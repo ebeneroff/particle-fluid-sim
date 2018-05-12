@@ -15,7 +15,8 @@ window.onload = function() {
 
     // Initialize the GL context
     gl = canvas.getContext("webgl");
-    var ext = gl.getExtension('OES_texture_float');
+
+    // var ext = gl.getExtension('OES_texture_float');
 
     // Only continue if WebGL is available and working
     if (!gl) {
@@ -53,9 +54,9 @@ window.onload = function() {
 
 var col = new Float32Array(controller.particles.num_particles * 3)
 for(var i = 0; i < controller.particles.num_particles; i+=3) {
-    col[i] = 1
-    col[i + 1] = 0
-    col[i + 2] = 0
+    col[i] = 1;
+    col[i + 1] = 1;
+    col[i + 2] = 1;
 }
 
 function render() {
@@ -67,6 +68,7 @@ function render() {
     if(controller.particles.size > 0) {
         gl.bufferData(gl.ARRAY_BUFFER, controller.particles.particles, gl.STATIC_DRAW);
         gl.drawArrays(gl.POINTS, 0, controller.particles.size);
+
         // gl.bufferData(gl.ARRAY_BUFFER, col, gl.STATIC_DRAW);
     }
 
@@ -78,7 +80,6 @@ function drawScene(gl, programInfo, buffers) {
     gl.vertexAttribPointer(programInfo.attribLocations.vertexColor, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(programInfo.attribLocations.vertexColor);
     
-    console.log(programInfo.attribLocations)
     gl.bindBuffer(gl.ARRAY_BUFFER, buffers[0])
     gl.vertexAttribPointer(programInfo.attribLocations.vertexPosition, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
@@ -103,7 +104,6 @@ function initBuffers(gl) {
     const positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, controller.particles.particles, gl.STATIC_DRAW);
-
     
     const colorBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
