@@ -2,19 +2,34 @@
 var width = canvas.width;
 var height = canvas.height;
 var gravity = vec2.fromValues(0, -.001);
+var maxLUTSize = 1e6;
 
 var Particles = function(){
     this.num_particles = 2000000;
     this.size = 50000;
     this.particles = new Float32Array(this.num_particles * 2);
     this.velocities = new Float32Array(this.num_particles * 2);
+    this.randomLUT = [];
+    this.randomIndex = 0;
 }
 
 Particles.prototype.initialize = function() {
-    for(var i = 0; i < this.size; i++ ) {
-        this.particles[i] = Math.random() - Math.random()
-        this.velocities[i] = (Math.random() - Math.random())/10000;
+    for(var i = 0; i < maxLUTSize; i++) {
+        this.randomLUT[i] = Math.random();
     }
+
+    for(var i = 0; i < this.size; i++ ) {
+        this.particles[i] = this.randomLookup() - this.randomLookup();
+        this.velocities[i] = (this.randomLookup() - this.randomLookup())/10000;
+    }
+}
+
+Particles.prototype.randomLookup = function () {
+    if(this.randomIndex > maxLUTSize) {
+        this.randomIndex = 0;
+    }
+    
+    return this.randomLUT[this.randomIndex++];
 }
 
 function convertToWorldX(x) {
@@ -64,22 +79,21 @@ Particles.prototype.add = function(x, y, num) {
         v = new Float32Array(this.num_particles);
     }
     
-
     // generate random data for added particles
     for(var i = 0; i < num * 2; i+= 2) {
-        f[size + i] = Math.random() - Math.random();
-        f[size + i + 1] = Math.random() - Math.random();
-        v[size + i] = (Math.random() - Math.random())/1000;
-        v[size + i + 1] = (Math.random() - Math.random())/1000;
+        f[size + i] = this.randomLookup() - this.randomLookup();
+        f[size + i + 1] = this.randomLookup() - this.randomLookup();
+        v[size + i] = (this.randomLookup() - this.randomLookup())/1000;
+        v[size + i + 1] = (this.randomLookup() - this.randomLookup())/1000;
 
         // add particles at mouse click
         if(x != undefined && y != undefined) {
             // console.log(x, y)
             // console.log(convertToWorldX(x), convertToWorldY(y))
-            f[size + i] = convertToWorldX(x) + (Math.random() - Math.random())/10;
-            f[size + i + 1] = convertToWorldY(y) + (Math.random() - Math.random())/10;
-            v[size + i] = (Math.random() - Math.random())/1000;
-            v[size + i + 1] = (Math.random() - Math.random())/1000;
+            f[size + i] = convertToWorldX(x) + (this.randomLookup() - this.randomLookup())/10;
+            f[size + i + 1] = convertToWorldY(y) + (this.randomLookup() - this.randomLookup())/10;
+            v[size + i] = (this.randomLookup() - this.randomLookup())/1000;
+            v[size + i + 1] = (this.randomLookup() - this.randomLookup())/1000;
         }
     }
 
@@ -99,12 +113,12 @@ Particles.prototype.drag = function(x, y, xprev, yprev, num) {
     for(var i = 0; i < this.size; i+=2) {
         let x = this.particles[i]
         let y = this.particles[i + 1]
-        let b1 = .1 - (Math.random() - Math.random())/10
-        let b2 = .1 - (Math.random() - Math.random())/10
+        let b1 = .1 - (this.randomLookup() - this.randomLookup())/10
+        let b2 = .1 - (this.randomLookup() - this.randomLookup())/10
 
         if(x - b1 < Xprev && x + b1 > Xprev && y - b2 < Yprev && y + b2 > Yprev) {
-            this.velocities[i] += ((X - (Xprev + (Math.random() - Math.random())/100))) * .1;
-            this.velocities[i + 1] += (Y - (Yprev + (Math.random() - Math.random())/100)) * .1;
+            this.velocities[i] += ((X - (Xprev + (this.randomLookup() - this.randomLookup())/100))) * .1;
+            this.velocities[i + 1] += (Y - (Yprev + (this.randomLookup() - this.randomLookup())/100)) * .1;
         }
     }
 }
@@ -112,13 +126,13 @@ Particles.prototype.drag = function(x, y, xprev, yprev, num) {
 Particles.prototype.update = function() {
     for(var i = 0; i < this.size; i+= 2) {
         if(this.particles[i] <= -.95 || this.particles[i] >= .95) {
-            this.velocities[i] = this.velocities[i] * -.5 + ((Math.random()-Math.random())/1000)
+            this.velocities[i] = this.velocities[i] * -.5 + ((this.randomLookup()-this.randomLookup())/1000)
             this.particles[i] += this.velocities[i]
             this.particles[i + 1] += this.velocities[i + 1];
         }
         else if(this.particles[i+1] <= -.95 || this.particles[i+1] >= .95) {
             this.particles[i] += this.velocities[i];
-            this.velocities[i + 1] = this.velocities[i + 1] * -.5 + ((Math.random()-Math.random())/1000)
+            this.velocities[i + 1] = this.velocities[i + 1] * -.5 + ((this.randomLookup()-this.randomLookup())/1000)
             this.particles[i + 1] += this.velocities[i + 1]
         }
         else {
@@ -140,17 +154,17 @@ Particles.prototype.advect = function(x, y, ) {
         let d = dist(x1, y1, X, Y);
         if(d < .5) {
             if(X - x1 > 0) {
-                this.velocities[i] -= .000001/d + (Math.random() - Math.random())/10000;
+                this.velocities[i] -= .000001/d + (this.randomLookup() - this.randomLookup())/10000;
             } 
             else {
-                this.velocities[i] += .000001/d + (Math.random() - Math.random())/10000;
+                this.velocities[i] += .000001/d + (this.randomLookup() - this.randomLookup())/10000;
             }
                 
             if(Y - y1 > 0) {
-                this.velocities[i + 1] -= .000001/d + (Math.random() - Math.random())/10000;
+                this.velocities[i + 1] -= .000001/d + (this.randomLookup() - this.randomLookup())/10000;
             }
             else  {
-                this.velocities[i + 1] += .000001/d + (Math.random() - Math.random())/10000;
+                this.velocities[i + 1] += .000001/d + (this.randomLookup() - this.randomLookup())/10000;
             }
             this.particles[i] += this.velocities[i]
             this.particles[i + 1] += this.velocities[i + 1]
